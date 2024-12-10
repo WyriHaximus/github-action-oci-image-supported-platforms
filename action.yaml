@@ -1,0 +1,27 @@
+name: 'OCI Image Supported Platforms'
+description: 'Get the OCI Platforms for a given OCI Image or Dockerfile'
+branding:
+  icon: 'cpu'
+  color: 'blue'
+inputs:
+  dockerfile:
+    description: The Dockerfile to get its supported platforms
+    required: false
+    default: 'Dockerfile'
+outputs:
+  platform:
+    description: The upstream supported platforms
+    value: ${{ steps.platform.outputs.platform }}
+runs:
+  using: "composite"
+  steps:
+    - name: Get FROM lines
+      id: from
+      shell: bash
+      run: |
+        printf "from=%s" $(cat ${{ inputs.dockerfile }} | grep FROM | tail -n 1 | docker run -q -i --rm ghcr.io/wyrihaximusnet/php:8.3-nts-alpine-slim php -r 'echo explode(" ", trim(fgets(STDIN)))[1];') >> $GITHUB_OUTPUT
+    - name: Get Platforms from Manifest
+      id: platform
+      shell: bash
+      run: |
+        printf "platform=%s" $(docker manifest inspect ${{ steps.from.outputs.from }} | docker run --rm -i -q ghcr.io/jqlang/jq:1.7.1 '([.manifests[].platform | select(.os != "unknown")]?) | .[] | (.os + "/" + .architecture)' | docker run --rm -i -q ghcr.io/jqlang/jq:1.7.1 -s -c '.') >> $GITHUB_OUTPUT

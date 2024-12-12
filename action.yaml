@@ -19,6 +19,14 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Checkout 🛒
+      if: inputs.image == ''
+      uses: actions/checkout@v4
+      with:
+        path: .wyrihaximus-oci-image-platforms
+        sparse-checkout-cone-mode: false
+        sparse-checkout: |
+          /${{ inputs.dockerfile }}
     - name: Get FROM lines
       id: from
       if: inputs.image == ''
@@ -39,3 +47,6 @@ runs:
       shell: bash
       run: |
         printf "platform=%s" $(docker manifest inspect ${{ steps.image.outputs.image }} | docker run --rm -i -q ghcr.io/jqlang/jq:1.7.1 '([.manifests[].platform | select(.os != "unknown")]?) | .[] | (.os + "/" + .architecture)' | docker run --rm -i -q ghcr.io/jqlang/jq:1.7.1 -s -c '.') >> $GITHUB_OUTPUT
+
+github:
+  head_ref:

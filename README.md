@@ -34,10 +34,7 @@ jobs:
     outputs:
       arch: ${{ steps.supported-arch-matrix.outputs.platform }}
     steps:
-      - uses: actions/checkout@v4
-        with:
-          sparse-checkout: |
-            Dockerfile
+      # Note: No checkout needed, the action will handle that for you in the most optimized way possible
       - id: supported-arch-matrix
         name: Generate Arch
         uses: wyrihaximus/github-action-oci-image-supported-archs@v1

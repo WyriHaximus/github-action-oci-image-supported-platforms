@@ -1,42 +1,39 @@
 name: Continuous Integration
-env:
-  DOCKER_BUILDKIT: 1
 on:
   push:
     branches:
       - main
   pull_request:
 jobs:
-  dockerfile:
-    name: Tests
+  tests:
+    name: Tests (${{ matrix.name }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Dockerfile
+            expected: '["linux/amd64","linux/arm64"]'
+            with:
+              dockerfile: tests/Dockerfile
+          - name: Supplied Image
+            expected: '["linux/amd64","linux/arm64"]'
+            with:
+              image: ghcr.io/wyrihaximusnet/php:8.3-zts-alpine-dev
+          - name: Both
+            expected: '["linux/arm64","linux/amd64","linux/arm","linux/arm","linux/386"]'
+            with:
+              dockerfile: tests/Dockerfile
+              image: ghcr.io/home-assistant/home-assistant:2024.12.2
     steps:
       - uses: actions/checkout@v4
       - name: OCI Image Supported Platforms
         id: platforms
         uses: ./
-        with:
-          dockerfile: tests/Dockerfile
+        with: ${{ matrix.with }}
       - name: Assert Dockerfile Platforms
         uses: nick-fields/assert-action@v2
         with:
-          expected: '["linux/amd64","linux/arm64"]'
-          actual: ${{ steps.platforms.outputs.platform }}
-          comparison: exact
-  supplied-image:
-    name: Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: OCI Image Supported Platforms
-        id: platforms
-        uses: ./
-        with:
-          dockerfile: tests/Dockerfile
-          image: ghcr.io/wyrihaximusnet/php:8.3-zts-alpine-dev
-      - name: Assert Dockerfile Platforms
-        uses: nick-fields/assert-action@v2
-        with:
-          expected: '["linux/amd64","linux/arm64"]'
+          expected: ${{ matrix.expected }}
           actual: ${{ steps.platforms.outputs.platform }}
           comparison: exact

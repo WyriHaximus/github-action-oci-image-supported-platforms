@@ -25,6 +25,10 @@ jobs:
             with:
               dockerfile: tests/Dockerfile
               image: ghcr.io/home-assistant/home-assistant:2024.12.2
+          - name: Multiple images
+            expected: '["linux/arm64","linux/amd64"]'
+            with:
+              image: ghcr.io/home-assistant/home-assistant:2024.12.2,ghcr.io/wyrihaximusnet/php:8.3-zts-alpine-dev
     steps:
       - uses: actions/checkout@v4
       - name: OCI Image Supported Platforms

@@ -9,7 +9,7 @@ inputs:
     required: false
     default: 'Dockerfile'
   image:
-    description: The OCI image to get its supported platforms
+    description: The OCI image to get its supported platforms, optionally a comma seperated list of images can be supplied and the intersection of the supported platforms will be the output
     required: false
     default: ''
 outputs:
@@ -33,7 +33,7 @@ runs:
       shell: bash
       run: |
         printf "from=%s" $(cat ${{ inputs.dockerfile }} | grep FROM | tail -n 1 | docker run -q -i --rm ghcr.io/wyrihaximusnet/php:8.3-nts-alpine-slim php -r 'echo explode(" ", trim(fgets(STDIN)))[1];') >> $GITHUB_OUTPUT
-    - name: Image Wizzard
+    - name: Image 🧙
       id: image
       shell: bash
       run: |
@@ -46,7 +46,15 @@ runs:
       id: platform
       shell: bash
       run: |
-        printf "platform=%s" $(docker manifest inspect ${{ steps.image.outputs.image }} | docker run --rm -i -q ghcr.io/jqlang/jq:1.7.1 '([.manifests[].platform | select(.os != "unknown")]?) | .[] | (.os + "/" + .architecture)' | docker run --rm -i -q ghcr.io/jqlang/jq:1.7.1 -s -c '.') >> $GITHUB_OUTPUT
-
-github:
-  head_ref:
+        getPlatformsForImage () {
+          docker manifest inspect $1 | docker run --rm -i -q ghcr.io/jqlang/jq:1.7.1 '([.manifests[].platform | select(.os != "unknown")]?) | .[] | (.os + "/" + .architecture)' | docker run --rm -i -q ghcr.io/jqlang/jq:1.7.1 -s -c '.'
+        }
+        getPlatformsIntersected () {
+          echo $1 | docker run -q -i --rm ghcr.io/wyrihaximusnet/php:8.3-nts-alpine-slim php -r 'echo json_encode(array_intersect(...array_values(json_decode(trim(fgets(STDIN)), true))), JSON_UNESCAPED_SLASHES);'
+        }
+        export -f getPlatformsForImage
+        if [[ "${{ steps.image.outputs.image }}" == *","* ]]; then
+          printf "platform=%s" $(getPlatformsIntersected $(echo "${{ steps.image.outputs.image }}" | tr ',' '\n'| xargs -I % bash -c 'getPlatformsForImage "%"' | docker run --rm -i -q ghcr.io/jqlang/jq:1.7.1 -s -c '.')) >> $GITHUB_OUTPUT
+        else
+          printf "platform=%s" $(getPlatformsForImage ${{ steps.image.outputs.image }}) >> $GITHUB_OUTPUT
+        fi

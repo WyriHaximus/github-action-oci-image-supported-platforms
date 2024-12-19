@@ -37,7 +37,7 @@ jobs:
       # Note: No checkout needed, the action will handle that for you in the most optimized way possible
       - id: supported-arch-matrix
         name: Generate Arch
-        uses: wyrihaximus/github-action-oci-image-supported-archs@v1
+        uses: wyrihaximus/github-action-oci-image-supported-platforms@v1
   build-docker-image:
     name: Build ${{ matrix.platform }} image
     strategy:

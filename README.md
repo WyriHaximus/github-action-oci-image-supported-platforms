@@ -15,6 +15,17 @@ The Dockerfile to get its supported platforms
 * *Default*: `Dockerfile`
 * *Example*: `Dockerfile-alpine-zts`
 
+### image
+
+Passing anything into the `image` input will disable checking for the passed `dockerfile` input value, and will get the 
+platforms for the image(s) you give it. When you pass it two or more, for example `ghcr.io/home-assistant/home-assistant:2024.12.2,ghcr.io/wyrihaximusnet/php:8.3-zts-alpine-dev`, 
+it will get the platforms for all of them but only return the platforms that are supported by all of them.
+
+* *Required*: `No`
+* *Type*: `string`
+* *Default*: ``
+* *Example*: `ghcr.io/wyrihaximusnet/php:8.3-zts-alpine-slim`
+
 ## Output
 
 This action only outputs a list of platforms as JSON through `platform`.
@@ -37,7 +48,7 @@ jobs:
       # Note: No checkout needed, the action will handle that for you in the most optimized way possible
       - id: supported-arch-matrix
         name: Generate Arch
-        uses: wyrihaximus/github-action-oci-image-supported-archs@v1
+        uses: wyrihaximus/github-action-oci-image-supported-platforms@v1
   build-docker-image:
     name: Build ${{ matrix.platform }} image
     strategy:

@@ -29,6 +29,10 @@ jobs:
             expected: '["linux/arm64","linux/amd64"]'
             with:
               image: ghcr.io/home-assistant/home-assistant:2024.12.2,ghcr.io/wyrihaximusnet/php:8.3-zts-alpine-dev
+          - name: Multiple Dockerfiles
+            expected: '["linux/amd64","linux/arm64"]'
+            with:
+              dockerfile: tests/Dockerfile*
     steps:
       - uses: actions/checkout@v4
       - name: OCI Image Supported Platforms

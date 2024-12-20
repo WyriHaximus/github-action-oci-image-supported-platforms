@@ -28,7 +28,11 @@ it will get the platforms for all of them but only return the platforms that are
 
 ## Output
 
-This action only outputs a list of platforms as JSON through `platform`.
+This action only outputs a list of platforms as JSON through `platform`, and as CSV `platform_csv`.
+
+For example when the found platforms are `linux/arm64` and `linux/amd64` the outputs are the following:
+* `plarform`: `["linux/arm64","linux/amd64"]`
+* `platform_csv`: `linux/arm64,linux/amd64`
 
 ## Example
 

@@ -34,25 +34,24 @@ For example when the found platforms are `linux/arm64` and `linux/amd64` the out
 * `plarform`: `["linux/arm64","linux/amd64"]`
 * `platform_csv`: `linux/arm64,linux/amd64`
 
-## Example
+## Building Example
 
-The following example build a docker image for each upstream arch:
+The following example build a docker image for each upstream platform:
 
 ```yaml
-name: Continuous Integration
-on:
-  push:
 jobs:
   supported-arch-matrix:
-    name: Supported processor architectures
-    runs-on: ubuntu-latest
     outputs:
       arch: ${{ steps.supported-arch-matrix.outputs.platform }}
     steps:
       # Note: No checkout needed, the action will handle that for you in the most optimized way possible
+      # It uses a sparse checkout with only the Dockerfile as the path to check out
       - id: supported-arch-matrix
         name: Generate Arch
         uses: wyrihaximus/github-action-oci-image-supported-platforms@v1
+      # You can optionally specify a different Dockerfile path  
+      #  with:
+      #    dockerfile: Dockerfile-non-default-path
   build-docker-image:
     name: Build ${{ matrix.platform }} image
     strategy:
@@ -61,25 +60,46 @@ jobs:
         platform: ${{ fromJson(needs.supported-arch-matrix.outputs.arch) }}
     needs:
       - supported-arch-matrix
-    runs-on: ubuntu-latest
     steps:
       - name: Prepare
         run: |
           platform=${{ matrix.platform }}
           echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      - uses: actions/checkout@v4
-      - run: docker image build --platform=${{ matrix.platform }} -t "vendor/repo:${{ env.PLATFORM_PAIR }}" --no-cache .
+      - name: Checkout
+        uses: actions/checkout@v6
+      - run: docker image build --platform=${{ matrix.platform }} -t "ghcr.io/${{ github.repository }}:sha-abc123-${{ env.PLATFORM_PAIR }}" --no-cache .
 ```
 
 For more details on how to take it from there, please have a look at [this blog post](https://blog.wyrihaximus.net/2024/10/building-secure-images-with-github-actions/).
 
+## Retagging Example
+
+The following example build a docker image for each upstream platform:
+
+```yaml
+jobs:
+  oci-retag:
+    steps:
+      - name: Prepare Dockerfile
+        run: |
+          echo "ghcr.io/${{ github.repository }}:sha-abc123" | tr '[:upper:]' '[:lower:]'
+          printf "FROM %s" $(echo "ghcr.io/${{ github.repository }}:sha-abc123" | tr '[:upper:]' '[:lower:]') >> Dockerfile.tag
+          cat Dockerfile.tag
+      - name: Detect Platform Flag
+        id: platform
+        uses: wyrihaximus/github-action-oci-image-supported-platforms@v1
+      # Since we want to inspect the already build image, we'll pass its location at the registry, and thus 
+      # we don't pass it a dockerfile. THose two options are mutually exclusive.
+        with:
+          image: ghcr.io/${{ github.repository }}:sha-abc123
+      - name: Pull, retag, and push image
+        run: |
+          docker build --platform=${{ steps.platform.outputs.platform_csv }} --output=type=registry --no-cache -f Dockerfile.tag -t $(echo "ghcr.io/${{ github.repository }}:r123" | tr '[:upper:]' '[:lower:]') .
+```
+
 ## License ##
 
-Copyright 2024 [Cees-Jan Kiewiet](http://wyrihaximus.net/)
+Copyright 2026 [Cees-Jan Kiewiet](http://wyrihaximus.net/)
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation

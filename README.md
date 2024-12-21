@@ -34,7 +34,7 @@ For example when the found platforms are `linux/arm64` and `linux/amd64` the out
 * `plarform`: `["linux/arm64","linux/amd64"]`
 * `platform_csv`: `linux/arm64,linux/amd64`
 
-## Example
+## Building Example
 
 The following example build a docker image for each upstream arch:
 

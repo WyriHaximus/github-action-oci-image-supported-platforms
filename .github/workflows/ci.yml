@@ -38,6 +38,16 @@ jobs:
             expected_csv: 'linux/amd64,linux/arm64'
             with:
               dockerfile: tests/Dockerfile*
+          - name: Enforce LowerCase (Dockerfile)
+            expected: '["linux/amd64","linux/arm64"]'
+            expected_csv: 'linux/amd64,linux/arm64'
+            with:
+              dockerfile: tests/Dockerfile-cameCase
+          - name: Enforce LowerCase (Image)
+            expected: '["linux/amd64","linux/arm64"]'
+            expected_csv: 'linux/amd64,linux/arm64'
+            with:
+              image: ghcr.io/WyriHaximusNet/php:8.3-zts-alpine-dev
     steps:
       - uses: actions/checkout@v4
       - name: OCI Image Supported Platforms

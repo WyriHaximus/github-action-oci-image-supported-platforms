@@ -14,23 +14,28 @@ jobs:
         include:
           - name: Dockerfile
             expected: '["linux/amd64","linux/arm64"]'
+            expected_csv: 'linux/amd64,linux/arm64'
             with:
               dockerfile: tests/Dockerfile
           - name: Supplied Image
             expected: '["linux/amd64","linux/arm64"]'
+            expected_csv: 'linux/amd64,linux/arm64'
             with:
               image: ghcr.io/wyrihaximusnet/php:8.3-zts-alpine-dev
           - name: Both
             expected: '["linux/arm64","linux/amd64","linux/arm","linux/arm","linux/386"]'
+            expected_csv: 'linux/arm64,linux/amd64,linux/arm,linux/arm,linux/386'
             with:
               dockerfile: tests/Dockerfile
               image: ghcr.io/home-assistant/home-assistant:2024.12.2
           - name: Multiple images
             expected: '["linux/arm64","linux/amd64"]'
+            expected_csv: 'linux/arm64,linux/amd64'
             with:
               image: ghcr.io/home-assistant/home-assistant:2024.12.2,ghcr.io/wyrihaximusnet/php:8.3-zts-alpine-dev
           - name: Multiple Dockerfiles
             expected: '["linux/amd64","linux/arm64"]'
+            expected_csv: 'linux/amd64,linux/arm64'
             with:
               dockerfile: tests/Dockerfile*
     steps:
@@ -39,9 +44,15 @@ jobs:
         id: platforms
         uses: ./
         with: ${{ matrix.with }}
-      - name: Assert Dockerfile Platforms
+      - name: Assert ${{ matrix.name }} Platforms (JSON)
         uses: nick-fields/assert-action@v2
         with:
           expected: ${{ matrix.expected }}
           actual: ${{ steps.platforms.outputs.platform }}
+          comparison: exact
+      - name: Assert ${{ matrix.name }} Platforms (CSV)
+        uses: nick-fields/assert-action@v2
+        with:
+          expected: ${{ matrix.expected_csv }}
+          actual: ${{ steps.platforms.outputs.platform_csv }}
           comparison: exact

@@ -14,8 +14,11 @@ inputs:
     default: ''
 outputs:
   platform:
-    description: The upstream supported platforms
+    description: The upstream supported platforms as JSON array
     value: ${{ steps.platform.outputs.platform }}
+  platform_csv:
+    description: The upstream supported platforms as CSV
+    value: ${{ steps.platform_csv.outputs.platform_csv }}
 runs:
   using: "composite"
   steps:
@@ -58,3 +61,9 @@ runs:
         else
           printf "platform=%s" $(getPlatformsForImage ${{ steps.image.outputs.image }}) >> $GITHUB_OUTPUT
         fi
+
+    - name: Create CSV from JSON
+      id: platform_csv
+      shell: bash
+      run: |
+        printf "platform_csv=%s" $(echo "${{ steps.platform.outputs.platform }}"  | docker run -q -i --rm ghcr.io/wyrihaximusnet/php:8.3-nts-alpine-slim php -r 'echo str_replace(["[", "\"", "]"], "", trim(fgets(STDIN)));') >> $GITHUB_OUTPUT

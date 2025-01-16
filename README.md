@@ -47,7 +47,7 @@ jobs:
     name: Supported processor architectures
     runs-on: ubuntu-latest
     outputs:
-      arch: ${{ steps.supported-arch-matrix.outputs.platform }}
+      platform: ${{ steps.supported-arch-matrix.outputs.platform }}
     steps:
       # Note: No checkout needed, the action will handle that for you in the most optimized way possible
       - id: supported-arch-matrix
@@ -58,7 +58,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: ${{ fromJson(needs.supported-arch-matrix.outputs.arch) }}
+        platform: ${{ fromJson(needs.supported-arch-matrix.outputs.platform) }}
     needs:
       - supported-arch-matrix
     runs-on: ubuntu-latest

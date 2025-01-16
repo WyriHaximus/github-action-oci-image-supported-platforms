@@ -29,13 +29,13 @@ runs:
         path: .wyrihaximus-oci-image-platforms
         sparse-checkout-cone-mode: false
         sparse-checkout: |
-          /${{ inputs.dockerfile }}
+          ${{ inputs.dockerfile }}
     - name: Get FROM lines
       id: from
       if: inputs.image == ''
       shell: bash
       run: |
-        printf "from=%s" $(cat ${{ inputs.dockerfile }} | grep FROM | xargs -I % docker run -q -i --rm ghcr.io/wyrihaximusnet/php:8.3-nts-alpine-slim php -r 'echo explode(" ", trim("%"))[1], ",";' | head -c -1) >> $GITHUB_OUTPUT
+        printf "from=%s" $(cat .wyrihaximus-oci-image-platforms/${{ inputs.dockerfile }} | grep FROM | xargs -I % docker run -q -i --rm ghcr.io/wyrihaximusnet/php:8.3-nts-alpine-slim php -r 'echo explode(" ", trim("%"))[1], ",";' | head -c -1) >> $GITHUB_OUTPUT
     - name: Image 🧙
       id: image
       shell: bash

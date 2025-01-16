@@ -55,11 +55,14 @@ runs:
         getPlatformsIntersected () {
           echo $1 | docker run -q -i --rm ghcr.io/wyrihaximusnet/php:8.3-nts-alpine-slim php -r 'echo json_encode(array_intersect(...array_values(json_decode(trim(fgets(STDIN)), true))), JSON_UNESCAPED_SLASHES);'
         }
+        getDeduplicatedPlatforms () {
+          echo $1 | docker run -q -i --rm ghcr.io/wyrihaximusnet/php:8.3-nts-alpine-slim php -r 'echo json_encode(array_values(array_unique(array_values(json_decode(trim(fgets(STDIN)), true)))), JSON_UNESCAPED_SLASHES);'
+        }
         export -f getPlatformsForImage
         if [[ "${{ steps.image.outputs.image }}" == *","* ]]; then
-          printf "platform=%s" $(getPlatformsIntersected $(echo "${{ steps.image.outputs.image }}" | tr ',' '\n'| xargs -I % bash -c 'getPlatformsForImage "%"' | docker run --rm -i -q ghcr.io/jqlang/jq:1.7.1 -s -c '.')) >> $GITHUB_OUTPUT
+          printf "platform=%s" $(getDeduplicatedPlatforms $(getPlatformsIntersected $(echo "${{ steps.image.outputs.image }}" | tr ',' '\n'| xargs -I % bash -c 'getPlatformsForImage "%"' | docker run --rm -i -q ghcr.io/jqlang/jq:1.7.1 -s -c '.'))) >> $GITHUB_OUTPUT
         else
-          printf "platform=%s" $(getPlatformsForImage ${{ steps.image.outputs.image }}) >> $GITHUB_OUTPUT
+          printf "platform=%s" $(getDeduplicatedPlatforms $(getPlatformsForImage ${{ steps.image.outputs.image }})) >> $GITHUB_OUTPUT
         fi
 
     - name: Create CSV from JSON

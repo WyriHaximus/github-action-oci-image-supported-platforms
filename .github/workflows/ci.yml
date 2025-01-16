@@ -23,8 +23,8 @@ jobs:
             with:
               image: ghcr.io/wyrihaximusnet/php:8.3-zts-alpine-dev
           - name: Both
-            expected: '["linux/arm64","linux/amd64","linux/arm","linux/arm","linux/386"]'
-            expected_csv: 'linux/arm64,linux/amd64,linux/arm,linux/arm,linux/386'
+            expected: '["linux/arm64","linux/amd64","linux/arm","linux/386"]'
+            expected_csv: 'linux/arm64,linux/amd64,linux/arm,linux/386'
             with:
               dockerfile: tests/Dockerfile
               image: ghcr.io/home-assistant/home-assistant:2024.12.2
@@ -48,6 +48,16 @@ jobs:
             expected_csv: 'linux/amd64,linux/arm64'
             with:
               image: ghcr.io/WyriHaximusNet/php:8.3-zts-alpine-dev
+          - name: Deduplicate found platforms
+            expected: '["linux/amd64","linux/arm","linux/arm64","linux/386","linux/ppc64le","linux/riscv64","linux/s390x"]'
+            expected_csv: 'linux/amd64,linux/arm,linux/arm64,linux/386,linux/ppc64le,linux/riscv64,linux/s390x'
+            with:
+              dockerfile: tests/alpine-Dockerfile
+          - name: Deduplicate found platforms for images
+            expected: '["linux/amd64","linux/arm","linux/arm64","linux/386","linux/ppc64le","linux/riscv64","linux/s390x"]'
+            expected_csv: 'linux/amd64,linux/arm,linux/arm64,linux/386,linux/ppc64le,linux/riscv64,linux/s390x'
+            with:
+              image: alpine:3.21.0,alpine:3.21.1,alpine:3.21.2
     steps:
       - uses: actions/checkout@v4
       - name: OCI Image Supported Platforms

@@ -24,7 +24,7 @@ runs:
   steps:
     - name: Checkout 🛒
       if: inputs.image == ''
-      uses: actions/checkout@v4
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
       with:
         path: .wyrihaximus-oci-image-platforms
         sparse-checkout-cone-mode: false

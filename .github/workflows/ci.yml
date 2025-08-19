@@ -59,7 +59,7 @@ jobs:
             with:
               image: alpine:3.21.0,alpine:3.21.1,alpine:3.21.2
     steps:
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: OCI Image Supported Platforms
         id: platforms
         uses: ./
